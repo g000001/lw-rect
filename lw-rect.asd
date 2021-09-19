@@ -11,7 +11,8 @@
   :serial T
   :components ((:file "package")
                (:file "emacsify")
-               (:file "lw-rect")))
+               (:file "lw-rect")
+               (:file "keybinds")))
 
 
 ;;; *EOF*

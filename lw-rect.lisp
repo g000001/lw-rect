@@ -32,15 +32,6 @@
 
 ;;; Code:
 
-(defvar *ctl-x-r-map* (ed.make-key-table))
-(define-key (ed.get-right-table :global :emacs) #("Control-x" "r") *ctl-x-r-map*)
-
-(define-key *ctl-x-r-map* "d" "Delete Rectangle")
-(define-key *ctl-x-r-map* "t" "String Rectangle")
-(define-key *ctl-x-r-map* "k" "Kill Rectangle")
-(define-key *ctl-x-r-map* "y" "Yank Rectangle")
-
-
 ;; FIXME: this function should be replaced by `apply-on-rectangle'
 #|(defun operate-on-rectangle (function start end coerce-tabs)
   "Call FUNCTION for each line of rectangle with corners at START, END.
