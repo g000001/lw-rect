@@ -119,27 +119,28 @@ rectangle, plus ARGS extra arguments.  Point is at the beginning of line when
 the function is called.
 The final point after the last operation will be returned."
   (save-excursion
-    (let* ((cols (pos-cols start end))
-           (startcol (car cols))
-           (endcol (cdr cols))
-           (startpt (progn
-                      (goto-char (point-position start))
-                      (line-beginning-position)))
-           (endpt (progn
-                    (goto-char (point-position end))
-                    (position-to-point (line-end-position))))
-           final-point)
-      ;; Ensure the start column is the left one.
-      (when (< endcol startcol)
-        (rotatef endcol startcol))
-      ;; Start looping over lines.
-      (goto-char startpt)
-      (loop (apply function startcol endcol args)
-            (setq final-point (point-position))
-            (unless (and (zerop (forward-line 1)) (bolp)
-                         (point<= (current-point) endpt))
-              (return)))
-      final-point)))
+    (editor::collect-undo-locking (current-buffer)
+      (let* ((cols (pos-cols start end))
+             (startcol (car cols))
+             (endcol (cdr cols))
+             (startpt (progn
+                        (goto-char (point-position start))
+                        (line-beginning-position)))
+             (endpt (progn
+                      (goto-char (point-position end))
+                      (position-to-point (line-end-position))))
+             final-point)
+        ;; Ensure the start column is the left one.
+        (when (< endcol startcol)
+          (rotatef endcol startcol))
+        ;; Start looping over lines.
+        (goto-char startpt)
+        (loop (apply function startcol endcol args)
+              (setq final-point (point-position))
+              (unless (and (zerop (forward-line 1)) (bolp)
+                           (point<= (current-point) endpt))
+                (return)))
+        final-point))))
 
 
 #|(defun rectangle-position-as-coordinates (position)
@@ -358,18 +359,19 @@ line is inserted at a point vertically under point, etc.
 RECTANGLE should be a list of strings.
 After this command, the mark is at the upper left corner
 and point is at the lower right corner."
-  (let ((lines rectangle)
-	(insertcolumn (current-column))
-	(first t))
-    (push-mark)
-    (do ((lines lines (cdr lines)))
-        ((null lines))
-      (unless first
-        (forward-line 1)
-        (or (bolp) (insert-string (current-point) (string #\Newline)))
-        (move-to-column insertcolumn t))
-      (setq first nil)
-      (insert-string (current-point) (car lines)))))
+  (editor::collect-undo-locking (current-buffer)
+    (let ((lines rectangle)
+          (insertcolumn (current-column))
+          (first t))
+      (push-mark)
+      (do ((lines lines (cdr lines)))
+          ((null lines))
+        (unless first
+          (forward-line 1)
+          (or (bolp) (insert-string (current-point) (string #\Newline)))
+          (move-to-column insertcolumn t))
+        (setq first nil)
+        (insert-string (current-point) (car lines))))))
 
 ;;;###autoload
 #|(defun open-rectangle (start end &optional fill)
